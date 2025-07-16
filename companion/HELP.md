@@ -1,3 +1,3 @@
-## Your module
+# Panasonic - AV-HS6000
 
-Write some help for your users here!
+Companion module to control Panasonic AV-HS6000 video mixer BUS

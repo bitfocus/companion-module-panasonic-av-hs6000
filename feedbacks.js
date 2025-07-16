@@ -1,33 +1,52 @@
-const { combineRgb } = require('@companion-module/base')
+const { InstanceBase, combineRgb } = require('@companion-module/base');
 
-module.exports = async function (self) {
-	self.setFeedbackDefinitions({
-		ChannelState: {
-			name: 'Example Feedback',
+module.exports = {
+	getFeedbacks() {
+		const feedbacks = {};
+		
+		feedbacks.crosspoint_status = {
+			name: 'BUS/SOURCE Crosspoint Status',
 			type: 'boolean',
-			label: 'Channel State',
+			label: 'BUS/SOURCE Crosspoint Status',
 			defaultStyle: {
-				bgcolor: combineRgb(255, 0, 0),
-				color: combineRgb(0, 0, 0),
+				bgcolor: combineRgb(255, 0, 0)
 			},
 			options: [
 				{
-					id: 'num',
-					type: 'number',
-					label: 'Test',
-					default: 5,
-					min: 0,
-					max: 10,
+					id: 'bus',
+					type: 'dropdown',
+					label: 'BUS',
+					choices: this.getBusList(),
+					default: this.getFirstBusID()
 				},
+				{
+					id: 'src',
+					type: 'dropdown',
+					label: 'SOURCE',
+					choices: this.getSourcesList(),
+					default: '01'
+				}
 			],
 			callback: (feedback) => {
-				console.log('Hello world!', feedback.options.num)
-				if (feedback.options.num > 5) {
-					return true
-				} else {
-					return false
-				}
+				var busVar = this.getBusVariableFromID( feedback.options.bus );
+				const busStatus = this.getVariableValue(busVar);
+				return busStatus == feedback.options.src;
+			}
+		};
+		
+		feedbacks.connect_status = {
+			name: 'Connection Status',
+			type: 'boolean',
+			label: 'Mixer connection status',
+			defaultStyle: {
+				color: combineRgb(255, 255, 255)
 			},
-		},
-	})
-}
+			options: [],
+			callback: (feedback) => {
+				return this.getVariableValue('connect_status') == 'ok';
+			}
+		};
+		
+		return feedbacks;
+	}
+};
