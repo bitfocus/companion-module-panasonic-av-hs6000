@@ -1,19 +1,18 @@
-const { InstanceBase, Regex, runEntrypoint, InstanceStatus, TCPHelper, combineRgb, CompanionVariableValues } = require('@companion-module/base');
+const { InstanceBase, runEntrypoint, InstanceStatus, TCPHelper } = require('@companion-module/base');
 const configFields = require('./configFields');
 const actions = require('./actions');
 const feedbacks = require('./feedbacks');
 const presets = require('./presets');
 const variables = require('./variables');
 
-var refreshBusTimer;
-var refreshSrcTimer;
+let refreshBusTimer;
+let refreshSrcTimer;
 
-var tcpCommandBuffer = [];
-var tcpSendTimeout;
-var tcpSendTimeoutTime = 100;
-var currentCmd = false;
+let tcpCommandBuffer = [];
+let tcpSendTimeout;
+let currentCmd = false;
 
-var autoReply = false;
+const autoReply = false;
 
 const BUS = [
 	{ id: '01'	, label: 'ME1 PGM' }, // 0
@@ -313,7 +312,7 @@ class AVHSInstance extends InstanceBase {
 	
 	// BUS LIST
 	getBusList() {
-		var busList = [];
+		let busList = [];
 		if(this.config.enableME1) busList = busList.concat( BUS.slice(0,12) );
 		if(this.config.enableME2) busList = busList.concat( BUS.slice(12,24) );
 		if(this.config.enableDSK) busList = busList.concat( BUS.slice(24,32) );
@@ -326,9 +325,9 @@ class AVHSInstance extends InstanceBase {
 		return busList;
 	}
 	getBusNameByID(id) {
-		var name = "";
-		var l = BUS.length;
-		for(var i=0; i<l; i++) {
+		let name = "";
+		const l = BUS.length;
+		for(let i=0; i<l; i++) {
 			if(BUS[i].id == id) {
 				name = BUS[i].label;
 				break;
@@ -337,10 +336,10 @@ class AVHSInstance extends InstanceBase {
 		return name;
 	}
 	getBusNumByID(id) {
-		var busList = this.getBusList();
-		var num = -1;
-		var l = busList.length;
-		for(var i=0; i<l; i++) {
+		const busList = this.getBusList();
+		let num = -1;
+		const l = busList.length;
+		for(let i=0; i<l; i++) {
 			if(busList[i].id == id) {
 				num = i;
 				break;
@@ -349,9 +348,9 @@ class AVHSInstance extends InstanceBase {
 		return num;
 	}
 	getBusVariableFromName(name) { return "bus_"+name.replaceAll(" ", "-"); }
-	getBusVariableFromID(id) { let name = this.getBusNameByID(id); return (name!="") ? this.getBusVariableFromName(name) : ""; }
+	getBusVariableFromID(id) { const name = this.getBusNameByID(id); return (name!="") ? this.getBusVariableFromName(name) : ""; }
 	getFirstBusID() {
-		var busList = this.getBusList();
+		const busList = this.getBusList();
 		if(busList.length>0) return busList[0].id;
 		return "00";
 	}
@@ -359,11 +358,11 @@ class AVHSInstance extends InstanceBase {
 	// SOURCES
 	getSourcesList() { return SOURCES; }
 	getSourceNameByID(id, forceDefault) {
-		var name = "";
-		var l = SOURCES.length;
-		for(var i=0; i<l; i++) {
+		let name = "";
+		const l = SOURCES.length;
+		for(let i=0; i<l; i++) {
 			if(SOURCES[i].id == id) {
-				let label = SOURCES[i].label;
+				const label = SOURCES[i].label;
 				name = (this.config.src_name=="panel" || this.config.src_name=="mv") && !forceDefault ? this.getVariableValue(this.getSourceVariableFromName(label)) : label;
 				break;
 			}
@@ -371,9 +370,9 @@ class AVHSInstance extends InstanceBase {
 		return name;
 	}
 	getSourceNumByID(id) {
-		var num = -1;
-		var l = SOURCES.length;
-		for(var i=0; i<l; i++) {
+		let num = -1;
+		const l = SOURCES.length;
+		for(let i=0; i<l; i++) {
 			if(SOURCES[i].id == id) {
 				num = i;
 				break;
@@ -382,7 +381,7 @@ class AVHSInstance extends InstanceBase {
 		return num;
 	}
 	getSourceVariableFromName(name) { return "src_"+name.replaceAll(" ", "-"); }
-	getSourceVariableFromID(id) { let name = this.getSourceNameByID(id, true); return (name!="") ? this.getSourceVariableFromName(name) : ""; }
+	getSourceVariableFromID(id) { const name = this.getSourceNameByID(id, true); return (name!="") ? this.getSourceVariableFromName(name) : ""; }
 	
 	// TCP CONNECTION
 	initTCP() {
@@ -451,9 +450,9 @@ class AVHSInstance extends InstanceBase {
 	async sendNextCommand() {
 		if(tcpSendTimeout || tcpCommandBuffer.length==0) return;
 		tcpSendTimeout = true;
-		var cue = tcpCommandBuffer.shift();
-		var cmd = cue.cmd;
-		var escCmd = unescape(await this.parseVariablesInString(cmd));
+		const cue = tcpCommandBuffer.shift();
+		let cmd = cue.cmd;
+		const escCmd = unescape(await this.parseVariablesInString(cmd));
 		if(escCmd!="") {
 			this.log('debug', `AV-HS6000 | SENDIND COMMAND >>> ${escCmd} | callback: ${cue.clbk}`);
 			const sendBuf = Buffer.from(escCmd, 'latin1');
@@ -465,12 +464,12 @@ class AVHSInstance extends InstanceBase {
 				/*** AUTO REPLY ***/
 				if(autoReply) {
 					cmd = cmd.replaceAll("%02", "").replaceAll("%03", "");
-					var parts = cmd.split(":");
+					const parts = cmd.split(":");
 					// GET BUS XPT
 					if(parts[0] == "QBSC" && parts.length==2) {
 						setTimeout(function(self) {
 							const busStatus = self.getVariableValue(self.getBusVariableFromID(parts[1]));
-							var source = (busStatus && busStatus!='00') ? busStatus : '01';
+							const source = (busStatus && busStatus!='00') ? busStatus : '01';
 							self.parseReceivedMessage(` ABSC:${parts[1]}:${source} `);
 						}, 2, this);
 					}
@@ -484,7 +483,7 @@ class AVHSInstance extends InstanceBase {
 					else if(parts[0] == "QSNM" && parts.length==3) {
 						setTimeout(function(self) {
 							const srcName = self.getVariableValue(self.getSourceVariableFromID(parts[2]));
-							self.parseReceivedMessage(` ASNM:${parts[1]}:${parts[2]}:TOTO `);
+							self.parseReceivedMessage(` ASNM:${parts[1]}:${parts[2]}:${srcName || 'Unknown'} `);
 						}, 2, this);
 					}
 				}
@@ -518,12 +517,12 @@ class AVHSInstance extends InstanceBase {
 		
 		this.log('debug', `AV-HS6000 | receive message > "${msg}"`);
 		msg = msg.slice(1, -1);
-		var method = msg.slice(0,4);
+		const method = msg.slice(0,4);
 		// BUS XPT
 		if(method=="ABUS" || method=="ABSC") {
-			let parts = msg.split(":");
+			const parts = msg.split(":");
 			if(parts.length==3) {
-				let busVar = this.getBusVariableFromID( parts[1] );
+				const busVar = this.getBusVariableFromID( parts[1] );
 				if(busVar!="") {
 					const variables = {};
 					variables[busVar] = parts[2];
@@ -534,10 +533,10 @@ class AVHSInstance extends InstanceBase {
 		}
 		// SRC NAME
 		else if(method=="ASNM") {
-			let parts = msg.split(":");
+			const parts = msg.split(":");
 			if(parts.length==4) {
-				let srcVar = this.getSourceVariableFromID( parts[2] );
-				let srcName = parts[3].replaceAll(' ', '\n');
+				const srcVar = this.getSourceVariableFromID( parts[2] );
+				const srcName = parts[3].replaceAll(' ', '\n');
 				if(srcVar!="") {					
 					const variables = {};
 					variables[srcVar] = srcName;
@@ -556,11 +555,11 @@ class AVHSInstance extends InstanceBase {
 	
 	// REFRESH BUS XPT
 	refreshBusesXPT() {
-		var busList = this.getBusList();
-		var l = busList.length;
-		for(var i=0; i<l; i++) {
-			let busID = busList[i].id;
-			let cmd = `%02QBSC:${busID}%03`;
+		const busList = this.getBusList();
+		const l = busList.length;
+		for(let i=0; i<l; i++) {
+			const busID = busList[i].id;
+			const cmd = `%02QBSC:${busID}%03`;
 			this.sendCommand(cmd, (i==l-1) ? "startRefreshBusesXPTtimer" : false);
 		}
 	}
@@ -580,13 +579,13 @@ class AVHSInstance extends InstanceBase {
 	
 	// REFRESH SRC NAME
 	refreshSourcesNames() {
-		var srcList = this.getSourcesList();
-		var l = srcList.length;
+		const srcList = this.getSourcesList();
+		const l = srcList.length;
 		if(l>0 && (this.config.src_name=="panel" || this.config.src_name=="mv")) {
-			var from = this.config.src_name=="panel" ? '00' : '01';
-			for(var i=0; i<l; i++) {
-				let srcID = srcList[i].id;
-				let cmd = `%02QSNM:${from}:${srcID}%03`;
+			const from = this.config.src_name=="panel" ? '00' : '01';
+			for(let i=0; i<l; i++) {
+				const srcID = srcList[i].id;
+				const cmd = `%02QSNM:${from}:${srcID}%03`;
 				this.sendCommand(cmd, (i==l-1) ? "startRefreshSourcesNamesTimer" : false);
 			}
 		}

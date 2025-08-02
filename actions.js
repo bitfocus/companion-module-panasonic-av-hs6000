@@ -1,5 +1,3 @@
-const { Regex } = require('@companion-module/base');
-
 module.exports = {
 	getActions() {
 		const actions = {};

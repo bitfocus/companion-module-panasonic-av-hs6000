@@ -3,11 +3,11 @@ module.exports = {
 	getPresets() {
 		const presets = {};
 		
-		var busList = this.getBusList();
-		var srcList = this.getSourcesList();
+		const busList = this.getBusList();
+		const srcList = this.getSourcesList();
 		busList.forEach((bus) => {
 			srcList.forEach((src) => {
-				let srcVar = this.getSourceVariableFromName(src.label);
+				const srcVar = this.getSourceVariableFromName(src.label);
 				presets[`xpt_${bus.id}_${src.id}`] = {
 					type: 'button',
 					category: bus.label+" - XPT",

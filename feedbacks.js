@@ -1,4 +1,4 @@
-const { InstanceBase, combineRgb } = require('@companion-module/base');
+const { combineRgb } = require('@companion-module/base');
 
 module.exports = {
 	getFeedbacks() {
@@ -28,7 +28,7 @@ module.exports = {
 				}
 			],
 			callback: (feedback) => {
-				var busVar = this.getBusVariableFromID( feedback.options.bus );
+				const busVar = this.getBusVariableFromID( feedback.options.bus );
 				const busStatus = this.getVariableValue(busVar);
 				return busStatus == feedback.options.src;
 			}
@@ -42,7 +42,7 @@ module.exports = {
 				color: combineRgb(255, 255, 255)
 			},
 			options: [],
-			callback: (feedback) => {
+			callback: (_feedback) => {
 				return this.getVariableValue('connect_status') == 'ok';
 			}
 		};

@@ -3,7 +3,7 @@
 	"name": "panasonic-av-hs6000",
 	"shortname": "AV-HS6000",
 	"description": "Panasonic AV-HS6000 mixer module for Companion",
-	"version": "1.0.0",
+	"version": "0.0.0",
 	"license": "MIT",
 	"repository": "git+https://github.com/bitfocus/companion-module-panasonic-av-hs6000.git",
 	"bugs": "https://github.com/bitfocus/companion-module-panasonic-av-hs6000/issues",
